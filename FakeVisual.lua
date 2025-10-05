@@ -1,51 +1,50 @@
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 local Backpack = player:WaitForChild("Backpack")
 
+-- ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CloneUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
+-- Main Frame
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 260, 0, 140)
+frame.Size = UDim2.new(0, 280, 0, 150)
 frame.Position = UDim2.new(0.35, 0, 0.35, 0)
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
 frame.Active = true
-frame.Draggable = true
 frame.Parent = screenGui
 
--- Drop shadow effect
-local shadow = Instance.new("ImageLabel")
-shadow.Name = "Shadow"
-shadow.Image = "rbxassetid://1316045217"
-shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-shadow.ImageTransparency = 0.4
-shadow.ScaleType = Enum.ScaleType.Slice
-shadow.SliceCenter = Rect.new(10, 10, 118, 118)
-shadow.Size = UDim2.new(1, 20, 1, 20)
-shadow.Position = UDim2.new(0, -10, 0, -10)
-shadow.BackgroundTransparency = 1
-shadow.ZIndex = 0
-shadow.Parent = frame
+-- Rounded Corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 15)
+corner.Parent = frame
 
-local cornerFrame = Instance.new("UICorner")
-cornerFrame.CornerRadius = UDim.new(0, 15)
-cornerFrame.Parent = frame
+-- UI Stroke
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(0, 190, 255)
+stroke.Parent = frame
 
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -20, 0, 35)
-title.Position = UDim2.new(0, 10, 0, 5)
-title.BackgroundTransparency = 1
-title.Text = "Duplicate Tool"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = frame
+-- Title Bar (for dragging)
+local titleBar = Instance.new("TextLabel")
+titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+titleBar.Text = "Duplicate Tool"
+titleBar.Font = Enum.Font.GothamBold
+titleBar.TextSize = 18
+titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleBar.Parent = frame
 
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 15)
+titleCorner.Parent = titleBar
+
+-- Button
 local button = Instance.new("TextButton")
 button.Size = UDim2.new(0.85, 0, 0, 45)
 button.Position = UDim2.new(0.075, 0, 0.45, 0)
@@ -53,38 +52,61 @@ button.Text = "Duplicate"
 button.Font = Enum.Font.GothamBold
 button.TextSize = 18
 button.TextColor3 = Color3.fromRGB(255,255,255)
-button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 button.AutoButtonColor = true
 button.Parent = frame
 
-local cornerBtn = Instance.new("UICorner")
-cornerBtn.CornerRadius = UDim.new(0, 12)
-cornerBtn.Parent = button
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 12)
+btnCorner.Parent = button
 
-local strokeBtn = Instance.new("UIStroke")
-strokeBtn.Thickness = 1.5
-strokeBtn.Color = Color3.fromRGB(0, 200, 255)
-strokeBtn.Parent = button
-
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))
-}
-gradient.Rotation = 45
-gradient.Parent = button
-
+-- Status label
 local status = Instance.new("TextLabel")
 status.Size = UDim2.new(1, -20, 0, 20)
-status.Position = UDim2.new(0, 10, 0.8, 0)
+status.Position = UDim2.new(0, 10, 0.78, 0)
 status.BackgroundTransparency = 1
 status.Text = "Ready"
 status.Font = Enum.Font.Gotham
 status.TextSize = 16
-status.TextColor3 = Color3.fromRGB(200,200,200)
+status.TextColor3 = Color3.fromRGB(200, 200, 200)
 status.TextXAlignment = Enum.TextXAlignment.Left
 status.Parent = frame
 
+-- Dragging System (works everywhere)
+local dragging, dragInput, dragStart, startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                               startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- Button Functionality
 local function cloneHeldTool()
     local char = player.Character
     if not char then return end
